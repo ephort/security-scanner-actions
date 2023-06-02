@@ -22,7 +22,12 @@ runs:
         headers_file=$(mktemp)
 
         # Make the POST request and save both headers and body
-        response=$(curl -s -X POST -D "$headers_file" "https://ephort.dk/scanner/api/v1/scan?url=${{ inputs.target-url }}&minimum_grade=${{ inputs.minimum-grade }}")
+        response=$(curl -s -X POST \
+          -D "$headers_file" \
+          --data-urlencode "url=${{ inputs.target-url }}" \
+          --data-urlencode "minimum_grade=${{ inputs.minimum-grade }}" \
+          https://ephort.dk/scanner/api/v1/scan
+        )
 
         # Read the headers from the file into a variable
         headers=$(cat "$headers_file")
