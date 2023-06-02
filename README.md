@@ -20,6 +20,8 @@ jobs:
           minimum-grade: "F"
 ```
 
+Save the contents to a file in your GitHub repository in the `.github/workflows` directory, e.g. `.github/workflows/security_scanner.yml`
+
 ## Inputs
 
 | Property      | Default | Required | Description                          |
