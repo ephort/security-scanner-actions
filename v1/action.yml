@@ -16,8 +16,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Make HTTP Request
-      uses: docker://ubuntu:latest
+    - shell: bash
       run: |
         # Create a temporary file to store the headers
         headers_file=$(mktemp)
