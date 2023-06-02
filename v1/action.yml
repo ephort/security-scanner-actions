@@ -14,7 +14,7 @@ inputs:
     default: 'D'
 
 runs:
-  using: "docker"
+  using: "composite"
   image: ubuntu-latest
 
   steps:
