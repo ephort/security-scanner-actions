@@ -15,13 +15,9 @@ inputs:
 
 runs:
   using: "composite"
-  image: ubuntu-latest
-
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
     - name: Make HTTP Request
+    - uses: docker://ubuntu:latest
       run: |
         # Create a temporary file to store the headers
         headers_file=$(mktemp)
