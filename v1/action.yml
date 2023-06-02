@@ -1,0 +1,53 @@
+name: "Security Scanner for Laravel"
+description: "Check your Laravel application for vulnerabilties using Security Scanner for Laravel"
+author: "Ephort ApS"
+branding:
+  icon: "cloud-lightning"
+  color: "blue"
+inputs:
+  target-url:
+    description: 'The URL to scan'
+    required: true
+  minimum-grade:
+    description: 'The minimum grade that will make the scan pass'
+    required: true
+    default: 'D'
+
+runs:
+  using: "docker"
+  image: ubuntu-latest
+
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Make HTTP Request
+      run: |
+        # Create a temporary file to store the headers
+        headers_file=$(mktemp)
+
+        # Make the POST request and save both headers and body
+        response=$(curl -s -X POST -D "$headers_file" "https://ephort.dk/scanner/api/v1/scan?url=${INPUT_TARGET-URL}&minimum_grade=${INPUT_MINIMUM-GRADE}")
+
+        # Read the headers from the file into a variable
+        headers=$(cat "$headers_file")
+        rm "$headers_file"
+
+        # Extract the status code from the headers
+        status_code=$(echo "$headers" | awk -v RS='\r?\n' '/^HTTP/{print $2}')
+
+        grade=$(echo $response | jq -r '.grade')
+        message=$(echo $response | jq -r '.message')
+
+        if [ "$status_code" == "200" ]; then
+          echo "Security Scan complete and grade met expectations."
+        elif [ "$status_code" == "400" ] && [ "$message" == "Invalid URL" ]; then
+          echo "Invalid URL provided. Please check the URL and try again."
+          exit 1
+        elif [ "$status_code" == "400" ] && [ "$message" == "Invalid minimum grade" ]; then
+          echo "Invalid minimum grade. Please check the minimum_grade parameter and try again."
+          exit 1
+        else
+          echo "Security Scan failed as it did not meet grade expectations. The actual grade was $grade."
+          exit 1
+        fi
