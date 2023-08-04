@@ -10,8 +10,12 @@ inputs:
     required: true
   minimum-grade:
     description: 'The minimum grade that will make the scan pass'
-    required: true
-    default: 'D'
+    required: false
+    default: 'F'
+  checks:
+    description: 'A comma-separated list of the specific checks to run'
+    required: false
+    default: ''
 
 runs:
   using: "composite"
@@ -26,6 +30,7 @@ runs:
           -D "$headers_file" \
           --data-urlencode "url=${{ inputs.target-url }}" \
           --data-urlencode "minimum_grade=${{ inputs.minimum-grade }}" \
+          --data-urlencode "checks=${{ inputs.checks }}" \
           https://ephort.dk/scanner/api/v1/scan
         )
 
@@ -45,7 +50,7 @@ runs:
         message=$(echo $response | jq -r '.message')
 
         if [ "$status_code" == "200" ]; then
-          echo "Security Scan complete and grade met expectations."
+          echo "Security Scan complete and met expectations."
         elif [ "$status_code" == "400" ] && [ "$message" == "Invalid URL" ]; then
           echo "Invalid URL provided. Please check the URL and try again."
           exit 1
@@ -56,6 +61,6 @@ runs:
           echo "Security Scan failed as it did not meet grade expectations. The actual grade was $grade."
           exit 1
         else
-          echo "Security Scan failed as it did not meet grade expectations. The actual grade was $grade."
+          echo "Security Scan failed as one or more of the checks failed."
           exit 1
         fi
